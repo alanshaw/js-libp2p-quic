@@ -1,6 +1,6 @@
 'use strict'
 
-const QUIC = require('quic')
+const Quic = require('quic')
 const { AbortError } = require('abortable-iterator')
 const log = require('debug')('libp2p:quic:Listener')
 

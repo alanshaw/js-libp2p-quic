@@ -15,6 +15,12 @@
   "license": "(Apache-2.0 OR MIT)",
   "dependencies": {
     "abortable-iterator": "^3.0.0",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "multiaddr": "^7.2.1",
+    "stream-to-it": "^0.1.1"
+  },
+  "devDependencies": {
+    "it-pipe": "^1.1.0",
+    "tape": "^4.11.0"
   }
 }
