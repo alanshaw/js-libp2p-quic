@@ -7,9 +7,8 @@ const Path = require('path')
 const { AbortError } = require('abortable-iterator')
 const log = require('debug')('libp2p:quic:Transport')
 const Multiaddr = require('multiaddr')
-const toIterable = require('stream-to-it')
 const Listener = require('./Listener')
-const MultiaddrConnection = require('./MultiaddrConnection')
+const toConnection = require('./to-connection')
 const { NotDialableError } = require('./errors')
 
 const key = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-key.pem'))
@@ -17,9 +16,8 @@ const cert = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-cert.pem'))
 const ca = Fs.readFileSync(Path.join(__dirname, '..', 'ca1-cert.pem'))
 
 class Transport {
-  constructor ({ privateKey, upgrader }) {
+  constructor ({ privateKey }) {
     this._privateKey = privateKey
-    this._upgrader = upgrader
   }
 
   async dial (addr, options) {
@@ -45,17 +43,18 @@ class Transport {
     const { address, port } = addr.nodeAddress()
     const socket = Quic.createSocket()
     socket.on('error', err => log('socket error', err))
-    const session = socket.connect({ key, cert, ca, address: 'localhost', port, alpn: '/libp2p/quic' })
+    const session = socket.connect({ key, cert, ca, address, port })
     session.on('error', err => log('session error', err))
 
     await new Promise(resolve => session.on('secure', resolve))
     log('dial to %s is now secure', addr)
 
-    const stream = session.openStream({ halfOpen: false })
-    // const maConn = new MultiaddrConnection(stream, { remoteAddr: addr, signal: options.signal })
+    const localAddr = (() => {
+      const { address, port, family } = socket.address
+      return `/ip${family.slice(-1)}/${address}/udp/${port}/quic`
+    })()
 
-    log('connection to %s established, upgrading...', addr)
-    return this._upgrader.upgradeOutbound(toIterable.duplex(stream))
+    return toConnection({ socket, session, localAddr }, { remoteAddr: addr, signal: options.signal })
   }
 
   createListener (options, handler) {

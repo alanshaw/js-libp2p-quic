@@ -16,7 +16,9 @@
   "dependencies": {
     "abortable-iterator": "^3.0.0",
     "debug": "^4.1.1",
+    "libp2p-interfaces": "^0.1.5",
     "multiaddr": "^7.2.1",
+    "multistream-select": "^0.15.1",
     "stream-to-it": "^0.1.1"
   },
   "devDependencies": {
