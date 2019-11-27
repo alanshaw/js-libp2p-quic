@@ -7,8 +7,9 @@ const Path = require('path')
 const { AbortError } = require('abortable-iterator')
 const log = require('debug')('libp2p:quic:Transport')
 const Multiaddr = require('multiaddr')
+const PeerId = require('peer-id')
 const Listener = require('./Listener')
-const toConnection = require('./to-connection')
+const toCapableConn = require('./to-capable-conn')
 const { NotDialableError } = require('./errors')
 
 const key = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-key.pem'))
@@ -43,7 +44,7 @@ class Transport {
     const { address, port } = addr.nodeAddress()
     const socket = Quic.createSocket()
     socket.on('error', err => log('socket error', err))
-    const session = socket.connect({ key, cert, ca, address, port })
+    const session = socket.connect({ key: this._privateKey, cert, ca, address, port })
     session.on('error', err => log('session error', err))
 
     await new Promise(resolve => session.on('secure', resolve))
@@ -54,7 +55,17 @@ class Transport {
       return `/ip${family.slice(-1)}/${address}/udp/${port}/quic`
     })()
 
-    return toConnection({ socket, session, localAddr }, { remoteAddr: addr, signal: options.signal })
+    if (!this._localPeer) {
+      this._localPeer = await PeerId.createFromPrivateKey(this._privateKey)
+    }
+
+    return toCapableConn({
+      socket,
+      session,
+      localAddr,
+      remoteAddr: addr,
+      localPeer: this._localPeer
+    }, { signal: options.signal })
   }
 
   createListener (options, handler) {
