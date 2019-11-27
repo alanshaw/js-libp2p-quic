@@ -16,6 +16,7 @@
   "dependencies": {
     "abortable-iterator": "^3.0.0",
     "debug": "^4.1.1",
+    "elliptic": "^6.5.2",
     "libp2p-interfaces": "^0.1.5",
     "multiaddr": "^7.2.1",
     "peer-id": "^0.13.5",

@@ -11,6 +11,7 @@ const PeerId = require('peer-id')
 const Listener = require('./Listener')
 const toCapableConn = require('./to-capable-conn')
 const { NotDialableError } = require('./errors')
+const { privateKeyToCertificate } = require('./crypto')
 
 const key = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-key.pem'))
 const cert = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-cert.pem'))
@@ -41,10 +42,17 @@ class Transport {
     log('dial %s', addr)
 
     // TODO: extract key and cert from libp2p private key
+    // https://github.com/libp2p/go-libp2p-tls/blob/master/crypto.go#L153
     const { address, port } = addr.nodeAddress()
     const socket = Quic.createSocket()
     socket.on('error', err => log('socket error', err))
-    const session = socket.connect({ key: this._privateKey, cert, ca, address, port })
+    const session = socket.connect({
+      key: this._privateKey,
+      cert: privateKeyToCertificate(this._privateKey),
+      ca,
+      address,
+      port
+    })
     session.on('error', err => log('session error', err))
 
     await new Promise(resolve => session.on('secure', resolve))
