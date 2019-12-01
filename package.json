@@ -14,11 +14,15 @@
   "author": "Alan Shaw",
   "license": "(Apache-2.0 OR MIT)",
   "dependencies": {
+    "@root/x509": "^0.7.2",
     "abortable-iterator": "^3.0.0",
+    "asn1.js": "^5.2.0",
+    "buffer": "^5.4.3",
     "debug": "^4.1.1",
     "elliptic": "^6.5.2",
     "libp2p-interfaces": "^0.1.5",
     "multiaddr": "^7.2.1",
+    "node-forge": "^0.9.1",
     "peer-id": "^0.13.5",
     "stream-to-it": "^0.1.1"
   },
