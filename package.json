@@ -19,15 +19,15 @@
     "asn1.js": "^5.2.0",
     "buffer": "^5.4.3",
     "debug": "^4.1.1",
-    "elliptic": "^6.5.2",
+    "eckles": "^1.4.1",
     "libp2p-interfaces": "^0.1.5",
     "multiaddr": "^7.2.1",
     "node-forge": "^0.9.1",
-    "peer-id": "^0.13.5",
     "stream-to-it": "^0.1.1"
   },
   "devDependencies": {
     "it-pipe": "^1.1.0",
+    "peer-id": "^0.13.5",
     "tape": "^4.11.0"
   }
 }
