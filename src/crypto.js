@@ -32,8 +32,8 @@ exports.privateKeyToCertificate = async privateKey => {
   serial[0] = 0x01
   cert.serialNumber.valueBlock.valueHex = serial
 
-  cert.notBefore.value = Date.now()
-  cert.notAfter.value = Date.now() + certValidityPeriod
+  cert.notBefore.value = new Date()
+  cert.notAfter.value = new Date(Date.now() + certValidityPeriod)
 
   const signedKey = new Sequence({
     value: [
