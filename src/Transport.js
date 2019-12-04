@@ -49,9 +49,10 @@ class Transport {
     const { address, port } = addr.nodeAddress()
     const socket = Quic.createSocket()
     socket.on('error', err => log('socket error', err))
+    const certInfo = privateKeyToCertificate(this._privateKey)
     const session = socket.connect({
       key: this._privateKey,
-      cert: privateKeyToCertificate(this._privateKey),
+      cert: certInfo.cert,
       ca,
       address,
       port,
