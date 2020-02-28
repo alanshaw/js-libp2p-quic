@@ -20,11 +20,11 @@
     "buffer": "^5.4.3",
     "debug": "^4.1.1",
     "eckles": "^1.4.1",
-    "libp2p-interfaces": "^0.1.5",
+    "libp2p-interfaces": "^0.2.3",
     "multiaddr": "^7.2.1",
     "node-forge": "^0.9.1",
     "pkijs": "^2.1.82",
-    "stream-to-it": "^0.1.1"
+    "stream-to-it": "^0.2.0"
   },
   "devDependencies": {
     "it-pipe": "^1.1.0",

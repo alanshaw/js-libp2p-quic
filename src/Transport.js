@@ -13,8 +13,6 @@ const toCapableConn = require('./to-capable-conn')
 const { NotDialableError } = require('./errors')
 const { privateKeyToCertificate } = require('./crypto')
 
-const key = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-key.pem'))
-const cert = Fs.readFileSync(Path.join(__dirname, '..', 'agent1-cert.pem'))
 const ca = Fs.readFileSync(Path.join(__dirname, '..', 'ca1-cert.pem'))
 
 // https://github.com/libp2p/go-libp2p-tls/blob/702fd537463ac5a1ef209c0b64457da0d1251b3f/crypto.go#L24

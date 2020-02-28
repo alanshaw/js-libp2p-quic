@@ -3,11 +3,11 @@ const X509 = require('@root/x509')
 const { fromBER, Sequence, OctetString, BitString } = require('asn1js')
 const Forge = require('node-forge')
 const Eckles = require('eckles')
-const { Certificate, PublicKeyInfo, AlgorithmIdentifier, Extension } = require('pkijs')
+const { Certificate, PublicKeyInfo, AlgorithmIdentifier, Extension, Time } = require('pkijs')
 const Crypto = require('crypto')
 
 // https://github.com/libp2p/go-libp2p-tls/blob/702fd537463ac5a1ef209c0b64457da0d1251b3f/crypto.go#L22
-const certValidityPeriod = 100 * 365 * 24 * 60 * 60 * 1000 // ~100 years
+const certValidityPeriod = 99 * 365 * 24 * 60 * 60 * 1000 // ~100 years
 // https://github.com/libp2p/go-libp2p-tls/blob/702fd537463ac5a1ef209c0b64457da0d1251b3f/crypto.go#L23
 const certificatePrefix = Buffer.from('libp2p-tls-handshake:')
 
@@ -32,13 +32,17 @@ exports.privateKeyToCertificate = async privateKey => {
   serial[0] = 0x01
   cert.serialNumber.valueBlock.valueHex = serial
 
-  cert.notBefore.value = new Date()
-  cert.notAfter.value = new Date(Date.now() + certValidityPeriod)
+  const notAfterDate = new Date(Date.now() + certValidityPeriod)
+  notAfterDate.setMilliseconds(0)
+
+  // 1: GeneralizedTime
+  cert.notBefore = new Time({ type: 1, value: new Date('0001-01-01T00:00:00.000Z') })
+  cert.notAfter = new Time({ type: 1, value: notAfterDate })
 
   const signedKey = new Sequence({
     value: [
-      new OctetString({ name: 'PubKey', value: publicKey }),
-      new OctetString({ name: 'Signature', value: signature })
+      new OctetString({ name: 'PubKey', valueHex: Buffer.from(publicKey.toString('hex'), 'hex') }),
+      new OctetString({ name: 'Signature', valueHex: Buffer.from(signature.toString('hex'), 'hex') })
     ]
   })
 
@@ -67,10 +71,13 @@ exports.privateKeyToCertificate = async privateKey => {
   const signResult = signer.sign(await Eckles.export({ jwk: certKey.private }))
   cert.signatureValue = new BitString({ valueHex: signResult })
 
+  const certRaw = Buffer.from(cert.toSchema(true).toBER(false))
+
   return {
     keyPair: certKey,
+    certRaw,
     cert: `-----BEGIN CERTIFICATE-----
-${Buffer.from(cert.toSchema(true).toBER(false)).toString('base64').replace(/(.{64})/g, '$1\n')}
+${certRaw.toString('base64').replace(/(.{64})/g, '$1\n')}
 -----END CERTIFICATE-----
 `
   }
@@ -84,12 +91,10 @@ const toPublicKeyInfo = async jwk => {
 }
 
 function stringToArrayBuffer (str) {
-  const stringLength = str.length
-
-  const resultBuffer = new ArrayBuffer(stringLength)
+  const resultBuffer = new ArrayBuffer(str.length)
   const resultView = new Uint8Array(resultBuffer)
 
-  for (let i = 0; i < stringLength; i++) {
+  for (let i = 0; i < str.length; i++) {
     resultView[i] = str.charCodeAt(i)
   }
 
